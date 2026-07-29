@@ -25,7 +25,8 @@ Eva is a voice-first AI companion that helps users improve spoken English, commu
 
 # 📸 Screenshots
 
-Coming Soon
+<img width="1907" height="932" alt="image" src="https://github.com/user-attachments/assets/f81c0051-fef1-4112-a442-8c7fb8e34545" />
+
 
 The repository will include screenshots for:
 
