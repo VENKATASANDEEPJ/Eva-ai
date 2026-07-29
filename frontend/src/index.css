@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --eva-bg: #050508;
+    --eva-surface: #0a0a12;
+    --eva-panel: #0f0f1a;
+    --eva-border: #1a1a2e;
+    --eva-accent: #6366f1;
+    --eva-accent-bright: #818cf8;
+    --eva-cyan: #22d3ee;
+    --eva-purple: #a855f7;
+    --eva-green: #10b981;
+    --eva-amber: #f59e0b;
+    --eva-red: #ef4444;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--eva-bg);
+    color: #e2e8f0;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--eva-surface);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--eva-border);
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--eva-accent);
+  }
+
+  ::selection {
+    background: rgba(99, 102, 241, 0.3);
+    color: #e2e8f0;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10;
+  }
+
+  .glass-panel {
+    @apply bg-eva-panel/80 backdrop-blur-xl border border-eva-border/50;
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 0 60px rgba(99, 102, 241, 0.1);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.3), 0 0 60px rgba(34, 211, 238, 0.1);
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1);
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-eva-accent-bright via-eva-cyan to-eva-purple bg-clip-text text-transparent;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl bg-eva-accent hover:bg-eva-accent-bright text-white font-medium
+           transition-all duration-200 active:scale-95 glow-accent;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 rounded-xl border border-eva-border hover:border-eva-accent/50
+           text-eva-text-dim hover:text-eva-text font-medium transition-all duration-200
+           bg-eva-surface/50 hover:bg-eva-surface;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 rounded-lg text-eva-text-dim hover:text-eva-text
+           hover:bg-white/5 transition-all duration-150;
+  }
+
+  .score-ring {
+    @apply relative inline-flex items-center justify-center;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-eva-text-dim
+           hover:text-eva-text hover:bg-white/5 transition-all duration-150 cursor-pointer;
+  }
+
+  .nav-item-active {
+    @apply text-eva-accent bg-eva-accent/10 border border-eva-accent/20;
+  }
+}
+
+@layer utilities {
+  .animate-breathe {
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  .animate-ripple {
+    animation: ripple 2s ease-out infinite;
+  }
+
+  .animate-wave {
+    animation: wave 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.8); }
+}
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+.page-exit {
+  opacity: 1;
+}
+
+.page-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}

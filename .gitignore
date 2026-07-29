@@ -1,0 +1,6 @@
+# Project-level ignores
+.DS_Store
+Thumbs.db
+*.log
+
+# Both frontend and backend have their own .gitignore
