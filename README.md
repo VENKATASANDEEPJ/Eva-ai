@@ -1,327 +1,378 @@
-# Eva — AI Communication Mentor
+# 🎙️ Eva — AI Communication Mentor
 
-> Your personal AI mentor for spoken English, confidence, and interview skills.
+> **Speak Better. Communicate Better. Interview Better.**
 
-Eva is a voice-first AI companion that helps you improve spoken English, communication skills, pronunciation, grammar, vocabulary, and interview performance through natural conversations.
+Eva is a voice-first AI companion that helps users improve spoken English, communication skills, pronunciation, grammar, vocabulary, and interview performance through natural conversations powered by AI.
 
 ---
 
-## Features
+# 🚀 Demo
+
+> 🚧 **Currently under active development**
+
+### MVP Features
+
+- 🎤 Voice-to-Voice Conversations
+- 🧠 AI English Tutor
+- 💼 Mock Interviews
+- 📊 Progress Dashboard
+- 📚 Daily Practice Sessions
+- 🔐 Secure Authentication
+
+📹 Demo video and screenshots will be added after the first stable release.
+
+---
+
+# 📸 Screenshots
+
+Coming Soon
+
+The repository will include screenshots for:
+
+- Home Screen
+- Voice Conversation
+- Interview Mode
+- Dashboard
+- Progress Analytics
+- Mobile Responsive UI
+
+---
+
+# ✨ Features
 
 | Feature | Description |
-|---|---|
-| 🎤 Voice Conversations | Voice-to-voice, continuous listening, natural responses |
-| 🧠 English Tutoring | Grammar, vocabulary, pronunciation, fluency coaching |
-| 💼 Interview Mode | Role-specific mock interviews with detailed reports |
-| 📚 Daily Practice | 9 practice modes (storytelling, debate, office English, etc.) |
-| 📊 Progress Dashboard | Charts, streaks, vocabulary growth, achievements |
-| 🔐 Google OAuth | Secure sign-in, persistent progress |
+|----------|-------------|
+| 🎤 Voice Conversations | Voice-to-voice conversations with continuous listening and natural AI responses |
+| 🧠 English Tutoring | Grammar correction, pronunciation, vocabulary expansion, fluency coaching |
+| 💼 Interview Mode | Role-specific mock interviews with AI-generated reports |
+| 📚 Daily Practice | Storytelling, debate, office English, casual conversations and more |
+| 📊 Progress Dashboard | Speaking analytics, vocabulary growth, streaks and achievements |
+| 🔐 Google OAuth | Secure authentication with persistent user progress |
 
 ---
 
-## Tech Stack
+# 🛠 Tech Stack
 
-**Frontend**  
-React 18 · TypeScript · Vite · TailwindCSS · Three.js · React Three Fiber · Framer Motion · Zustand · Recharts
+## Frontend
 
-**Backend**  
-FastAPI · Python 3.11+ · SQLAlchemy (async) · SQLite (dev) / PostgreSQL (prod)
-
-**AI**  
-OpenAI GPT-4o (conversation) · OpenAI TTS (speech synthesis) · OpenAI Whisper (transcription) · Web Speech API (browser-native fallback)
-
----
-
-## Prerequisites
-
-- **Node.js** 18+ and **npm** 9+
-- **Python** 3.11+
-- **Git**
-- A Google Cloud project with OAuth 2.0 credentials
-- An OpenAI API key
+- React 18
+- TypeScript
+- Vite
+- TailwindCSS
+- Three.js
+- React Three Fiber
+- Framer Motion
+- Zustand
+- React Query
+- Recharts
 
 ---
 
-## Installation
+## Backend
 
-### 1 — Clone and enter the project
+- FastAPI
+- Python 3.11+
+- SQLAlchemy (Async)
+- SQLite (Development)
+- PostgreSQL (Production)
 
-```powershell
-cd "C:\Users\jvenk\Desktop\Eva -AI"
+---
+
+## AI Stack
+
+- OpenAI API *(Model Configurable)*
+    - GPT-4o
+    - GPT-4.1
+    - Future-ready for GPT-5
+- OpenAI Whisper
+- OpenAI Text-to-Speech
+- Web Speech API (Browser Fallback)
+
+---
+
+# 📋 Prerequisites
+
+- Node.js 18+
+- npm 9+
+- Python 3.11+
+- Git
+- Google OAuth Credentials
+- OpenAI API Key
+
+---
+
+# ⚙️ Installation
+
+## Clone Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/eva-ai.git
+cd eva-ai
 ```
 
-### 2 — Frontend setup
+---
 
-```powershell
+## Frontend
+
+```bash
 cd frontend
+
 npm install
-```
 
-Copy the environment file and fill in your values:
-
-```powershell
 Copy-Item .env.example .env
 ```
 
-Edit `frontend\.env`:
+Update:
 
 ```env
 VITE_API_URL=http://localhost:8000
-VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
+VITE_GOOGLE_CLIENT_ID=your_client_id
 ```
 
-### 3 — Backend setup
+---
 
-```powershell
-cd ..\backend
+## Backend
+
+```bash
+cd ../backend
+
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+
+.venv\Scripts\activate
+
 pip install -r requirements.txt
-```
 
-Copy the environment file:
-
-```powershell
 Copy-Item .env.example .env
 ```
 
-Edit `backend\.env`:
+Update
 
 ```env
-OPENAI_API_KEY=sk-your-openai-key-here
-GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
-APP_SECRET_KEY=some-random-secret-32-chars-minimum
-JWT_SECRET_KEY=another-random-secret-for-jwt
+OPENAI_API_KEY=your_key
+
+GOOGLE_CLIENT_ID=your_client_id
+
+APP_SECRET_KEY=your_secret
+
+JWT_SECRET_KEY=your_secret
 ```
 
 ---
 
-## Running the App
+# ▶ Running Eva
 
-Open **two terminals** in VS Code.
+## Backend
 
-**Terminal 1 — Backend:**
+```bash
+cd backend
 
-```powershell
-cd "C:\Users\jvenk\Desktop\Eva -AI\backend"
-.venv\Scripts\Activate.ps1
+.venv\Scripts\activate
+
 uvicorn main:app --reload --port 8000
 ```
 
-**Terminal 2 — Frontend:**
+---
 
-```powershell
-cd "C:\Users\jvenk\Desktop\Eva -AI\frontend"
+## Frontend
+
+```bash
+cd frontend
+
 npm run dev
 ```
 
-Open your browser at **http://localhost:5173**
-
----
-
-## Google OAuth Setup
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project (or use existing)
-3. Navigate to **APIs & Services → Credentials**
-4. Click **Create Credentials → OAuth 2.0 Client ID**
-5. Application type: **Web application**
-6. Authorized JavaScript origins:
-   - `http://localhost:5173`
-7. Authorized redirect URIs:
-   - `http://localhost:5173`
-8. Copy the **Client ID** into both `.env` files
-
----
-
-## OpenAI Setup
-
-1. Sign up / log in at [platform.openai.com](https://platform.openai.com/)
-2. Go to **API Keys** and create a new key
-3. Paste the key as `OPENAI_API_KEY` in `backend\.env`
-
-> **Cost note:** The app uses GPT-4o for conversation, TTS for speech, and Whisper for transcription. A typical 30-minute session costs approximately $0.10–$0.30.
-
----
-
-## Project Structure
+Open
 
 ```
-Eva -AI/
-├── frontend/                   # React + TypeScript
+http://localhost:5173
+```
+
+---
+
+# 🔑 Google OAuth Setup
+
+1. Create a project in Google Cloud Console
+2. Enable OAuth Credentials
+3. Add
+
+```
+http://localhost:5173
+```
+
+as Authorized JavaScript Origin.
+
+Copy the generated Client ID into both `.env` files.
+
+---
+
+# 🤖 OpenAI Setup
+
+Create an API Key from OpenAI Platform.
+
+Add
+
+```env
+OPENAI_API_KEY=your_key
+```
+
+to
+
+```
+backend/.env
+```
+
+---
+
+# 📁 Project Structure
+
+```
+Eva-AI/
+
+├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── eva/            # EvaCore (Three.js), AudioVisualizer
-│   │   │   ├── layout/         # AppLayout, Sidebar, TopBar
-│   │   │   ├── modals/         # SettingsModal
-│   │   │   └── ui/             # Button, Card, Badge, Modal, Toast, ScoreCard
-│   │   ├── hooks/
-│   │   │   └── useVoice.ts     # Voice session orchestration hook
-│   │   ├── lib/
-│   │   │   ├── api.ts          # Axios client + all API calls
-│   │   │   └── utils.ts        # Helpers
-│   │   ├── pages/
-│   │   │   ├── LoginPage.tsx
-│   │   │   ├── HomePage.tsx
-│   │   │   ├── ConversationPage.tsx
-│   │   │   ├── InterviewPage.tsx
-│   │   │   ├── PracticePage.tsx
-│   │   │   ├── DashboardPage.tsx
-│   │   │   └── HistoryPage.tsx
-│   │   ├── services/
-│   │   │   ├── voiceService.ts # Web Speech API + audio metering
-│   │   │   └── ttsService.ts   # OpenAI TTS + Web Speech fallback
-│   │   ├── stores/
-│   │   │   ├── authStore.ts    # Zustand auth store (persisted)
-│   │   │   ├── sessionStore.ts # Active session state
-│   │   │   └── uiStore.ts      # UI state (toasts, modals, etc.)
-│   │   └── types/
-│   │       └── index.ts        # All TypeScript types
-│   ├── .env.example
-│   └── package.json
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.ts
 │
-├── backend/                    # FastAPI + Python
+├── backend/
 │   ├── app/
-│   │   ├── api/
-│   │   │   ├── router.py
-│   │   │   └── v1/
-│   │   │       ├── auth.py     # Google OAuth, JWT refresh, user profile
-│   │   │       ├── sessions.py # Session CRUD
-│   │   │       ├── chat.py     # Chat messages, TTS, STT
-│   │   │       ├── interview.py# Interview lifecycle + reports
-│   │   │       └── progress.py # Analytics, achievements
-│   │   ├── core/
-│   │   │   ├── config.py       # Pydantic settings
-│   │   │   ├── database.py     # Async SQLAlchemy engine
-│   │   │   ├── dependencies.py # FastAPI DI (auth, db)
-│   │   │   ├── logging.py      # Structured logging
-│   │   │   └── security.py     # JWT, bcrypt
-│   │   ├── models/             # SQLAlchemy ORM models
-│   │   ├── schemas/            # Pydantic request/response schemas
-│   │   └── services/
-│   │       ├── conversation_engine.py  # Eva's AI brain
-│   │       ├── interview_engine.py     # Interview Q&A + reporting
-│   │       ├── progress_service.py     # Stats aggregation
-│   │       ├── google_auth.py          # Google token verification
-│   │       └── openai_client.py        # OpenAI API wrapper
+│   ├── api/
+│   ├── core/
+│   ├── models/
+│   ├── schemas/
+│   ├── services/
+│   ├── alembic/
 │   ├── main.py
-│   ├── requirements.txt
-│   └── .env.example
+│   └── requirements.txt
 │
 └── README.md
 ```
 
 ---
 
-## Environment Variables Reference
+# 🌟 Roadmap
 
-### Frontend (`frontend/.env`)
+## Completed ✅
 
-| Variable | Required | Description |
-|---|---|---|
-| `VITE_API_URL` | Yes | Backend URL (default: `http://localhost:8000`) |
-| `VITE_GOOGLE_CLIENT_ID` | Yes | Google OAuth 2.0 Client ID |
-
-### Backend (`backend/.env`)
-
-| Variable | Required | Description |
-|---|---|---|
-| `OPENAI_API_KEY` | Yes | OpenAI API key |
-| `GOOGLE_CLIENT_ID` | Yes | Google OAuth Client ID |
-| `APP_SECRET_KEY` | Yes | App secret (32+ random chars) |
-| `JWT_SECRET_KEY` | Yes | JWT signing secret (32+ random chars) |
-| `DATABASE_URL` | No | Database URL (defaults to SQLite) |
-| `OPENAI_MODEL` | No | GPT model (default: `gpt-4o`) |
-| `OPENAI_TTS_VOICE` | No | TTS voice (default: `nova`) |
+- Voice-first architecture
+- AI conversation engine
+- Grammar correction
+- Interview module
+- Progress dashboard
+- Google Authentication
 
 ---
 
-## Using Eva Without API Keys
+## Coming Soon 🚀
 
-Eva is designed to work without API keys for initial exploration:
-
-- **Without OpenAI key:** The conversation engine will fail gracefully. Eva will respond with a fallback message. TTS falls back to the browser's Web Speech API.
-- **Without Google OAuth:** You cannot sign in. You can add a demo bypass (see below).
-
-### Demo Mode (no Google OAuth)
-
-To test without Google OAuth, temporarily add this endpoint to `backend/main.py`:
-
-```python
-@app.post("/api/auth/demo")
-async def demo_login():
-    # Returns a test token — NEVER use in production
-    ...
-```
+- Pronunciation scoring
+- Emotion-aware AI conversations
+- Resume-based interview generation
+- IELTS & TOEFL practice
+- AI memory
+- Personalized learning paths
+- Mobile application
+- Offline speech model
+- Multiple AI personalities
 
 ---
 
-## Switching to PostgreSQL
+# 🧩 Voice Recognition
 
-1. Install `asyncpg`: `pip install asyncpg`
-2. Update `backend/.env`:
-   ```env
-   DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/eva_db
-   ```
-3. Create the database: `createdb eva_db`
-4. Restart the backend — tables are created automatically on startup.
+Eva uses:
 
----
+- Web Speech API
+- OpenAI Whisper
 
-## Voice Recognition Notes
+For best experience use:
 
-- Voice recognition uses the **Web Speech API** (browser-native). This requires **Chrome** or **Edge** for best results.
-- Firefox has limited/no support for continuous speech recognition.
-- Microphone permission must be granted when first prompted.
-- The app falls back to text input automatically if voice is not available.
+- ✅ Chrome
+- ✅ Microsoft Edge
+
+Firefox has limited support.
 
 ---
 
-## Troubleshooting
+# 🛠 Troubleshooting
 
 | Problem | Solution |
-|---|---|
-| "Could not reach Eva" | Check backend is running on port 8000 |
-| Mic not working | Allow microphone in browser, use Chrome/Edge |
-| Google login fails | Verify Client ID is set correctly in both `.env` files |
-| TTS not speaking | Check `OPENAI_API_KEY` is valid; browser TTS activates as fallback |
-| Database errors | Delete `backend/eva.db` to reset the SQLite database |
-| `pip install` fails | Ensure Python 3.11+ and venv is activated |
+|----------|----------|
+| Backend not reachable | Verify FastAPI is running on port 8000 |
+| Microphone unavailable | Grant browser microphone permission |
+| Google Login fails | Verify OAuth Client ID |
+| Voice not playing | Check OpenAI API Key or browser TTS |
+| Database issues | Delete `backend/eva.db` and restart |
+| pip install errors | Use Python 3.11 virtual environment |
 
 ---
 
-## Available npm Scripts
+# 📜 Available Scripts
 
-```powershell
-npm run dev        # Start development server
-npm run build      # Production build
-npm run preview    # Preview production build
-npm run type-check # TypeScript type checking
-npm run lint       # ESLint
+```bash
+npm run dev
+
+npm run build
+
+npm run preview
+
+npm run lint
+
+npm run type-check
 ```
 
 ---
 
-## API Documentation
+# 📖 API Documentation
 
-When the backend is running, visit:
-- **Swagger UI:** http://localhost:8000/docs
-- **ReDoc:** http://localhost:8000/redoc
-- **Health check:** http://localhost:8000/health
+Once the backend is running:
+
+Swagger
+
+```
+http://localhost:8000/docs
+```
+
+ReDoc
+
+```
+http://localhost:8000/redoc
+```
+
+Health Check
+
+```
+http://localhost:8000/health
+```
 
 ---
 
-## Production Deployment Notes
+# 🚀 Production Deployment
 
-For production (not required for local MVP):
+For production deployment:
 
-1. Set `APP_ENV=production` to disable Swagger docs
-2. Use PostgreSQL instead of SQLite
-3. Set strong random values for `APP_SECRET_KEY` and `JWT_SECRET_KEY`
-4. Add your production domain to `ALLOWED_ORIGINS` and Google OAuth
-5. Serve frontend via `npm run build` output through a CDN or static host
-6. Run backend with `uvicorn main:app --host 0.0.0.0 --port 8000 --workers 2`
+- PostgreSQL
+- Strong JWT secrets
+- HTTPS
+- Production Google OAuth
+- Docker (optional)
+- CI/CD Pipeline
 
 ---
 
-*Built with Eva v1.0.0*
+# 👨‍💻 Author
+
+**Sandeep Venkata**
+
+B.Tech Computer Science (Data Science)
+
+GitHub: https://github.com/YOUR_USERNAME
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+⭐ **If you found this project interesting, consider giving it a star!**
