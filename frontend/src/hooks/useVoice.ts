@@ -1,188 +1,193 @@
-import { useEffect, useRef, useCallback } from 'react'
-import { useSessionStore } from '@/stores/sessionStore'
-import { useUIStore } from '@/stores/uiStore'
-import { voiceService } from '@/services/voiceService'
-import { ttsService } from '@/services/ttsService'
-import { chatApi } from '@/lib/api'
-import type { Message } from '@/types'
+import { useEffect, useRef, useCallback } from "react";
+import { useSessionStore } from "@/stores/sessionStore";
+import { useUIStore } from "@/stores/uiStore";
+import { voiceService } from "@/services/voiceService";
+import { ttsService } from "@/services/ttsService";
+import { chatApi } from "@/lib/api";
+import type { Message } from "@/types";
 
 export function useVoice() {
-  const {
-    status,
-    activeSession,
-    isRecording,
-    transcript,
-    setStatus,
-    setIsRecording,
-    setIsSpeaking,
-    setIsProcessing,
-    setAudioLevel,
-    setTranscript,
-    setInterimTranscript,
-    addMessage,
-    setEvaTyping,
-    setCurrentEvaMessage,
-  } = useSessionStore()
+  const store = useSessionStore();
+  const { addToast } = useUIStore();
 
-  // Keep a ref so callbacks always see the latest session without stale closures
-  const activeSessionRef = useRef(activeSession)
-  useEffect(() => { activeSessionRef.current = activeSession }, [activeSession])
-
-  const { addToast } = useUIStore()
-  const pendingTranscript = useRef('')
-
-  // Initialize voice service callbacks
+  // Keep refs to everything so callbacks never go stale
+  const storeRef = useRef(store);
   useEffect(() => {
-    voiceService.setCallbacks({
-      onStatus: (s) => {
-        if (s === 'listening') {
-          setStatus('listening')
-          setIsRecording(true)
-        } else {
-          setIsRecording(false)
-        }
-      },
-      onTranscript: (text, isFinal) => {
-        if (isFinal) {
-          pendingTranscript.current = text
-          setTranscript(text)
-          setInterimTranscript('')
-        } else {
-          setInterimTranscript(text)
-        }
-      },
-      onLevel: (level) => setAudioLevel(level),
-      onError: (err) => {
-        addToast('error', 'Voice Error', err)
-        setStatus('idle')
-        setIsRecording(false)
-      },
-    })
+    storeRef.current = store;
+  });
 
-    ttsService.setCallbacks({
-      onStart: () => {
-        setIsSpeaking(true)
-        setStatus('speaking')
-      },
-      onEnd: () => {
-        setIsSpeaking(false)
-        // If we were in conversation mode, go back to listening
-        if (activeSessionRef.current) {
-          setStatus('listening')
-        } else {
-          setStatus('idle')
-        }
-      },
-    })
+  const processingRef = useRef(false);
 
-    return () => {
-      voiceService.stopListening()
-      ttsService.stop()
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Auto-submit when final transcript arrives and we have a session
-  useEffect(() => {
-    if (transcript && activeSessionRef.current && status === 'listening') {
-      const text = transcript
-      setTranscript('')
-      pendingTranscript.current = ''
-      handleUserMessage(text)
-    }
-  }, [transcript]) // eslint-disable-line react-hooks/exhaustive-deps
-
+  // ── Handle a user message (voice or text) ─────────────────────────────────
   const handleUserMessage = useCallback(
     async (text: string) => {
-      const session = activeSessionRef.current
-      if (!session || !text.trim()) return
+      const s = storeRef.current;
+      const session = s.activeSession;
 
-      // Stop listening while processing
-      voiceService.stopListening()
-      setStatus('thinking')
-      setIsProcessing(true)
+      if (!session || !text.trim()) return;
+      if (processingRef.current) return; // prevent double-fire
 
-      // Add user message to UI immediately
+      processingRef.current = true;
+      voiceService.stopListening();
+      s.setStatus("thinking");
+      s.setIsProcessing(true);
+      s.setTranscript("");
+      s.setInterimTranscript("");
+
+      // Show user message immediately
       const userMsg: Message = {
-        id: Math.random().toString(36).slice(2),
+        id: Math.random().toString(36).slice(2) + Date.now(),
         sessionId: session.id,
-        role: 'user',
+        role: "user",
         content: text,
         timestamp: new Date().toISOString(),
-      }
-      addMessage(userMsg)
-      setEvaTyping(true)
+      };
+      s.addMessage(userMsg);
+      s.setEvaTyping(true);
 
       try {
-        const response = await chatApi.sendMessage(session.id, text)
-        const { evaMessage, corrections, vocabulary } = response.data.data
+        const response = await chatApi.sendMessage(session.id, text);
+        const { evaMessage, corrections, vocabulary } = response.data.data;
 
-        setEvaTyping(false)
+        s.setEvaTyping(false);
 
-        // Add Eva's response
         const evaMsg: Message = {
-          id: Math.random().toString(36).slice(2),
+          id: Math.random().toString(36).slice(2) + Date.now(),
           sessionId: session.id,
-          role: 'eva',
+          role: "eva",
           content: evaMessage,
           timestamp: new Date().toISOString(),
           corrections: corrections || [],
           vocabulary: vocabulary || [],
-        }
-        addMessage(evaMsg)
-        setCurrentEvaMessage(evaMessage)
+        };
+        s.addMessage(evaMsg);
+        s.setCurrentEvaMessage(evaMessage);
 
         // Speak Eva's response
-        setStatus('speaking')
-        await ttsService.speak(evaMessage)
+        s.setStatus("speaking");
+        await ttsService.speak(evaMessage);
 
-        // Resume listening
-        setIsProcessing(false)
-        await voiceService.startListening()
+        // Resume listening after Eva finishes speaking
+        s.setIsProcessing(false);
+        processingRef.current = false;
+        if (storeRef.current.activeSession) {
+          await voiceService.startListening();
+        }
       } catch (err) {
-        console.error('[useVoice] Error sending message:', err)
-        setEvaTyping(false)
-        setIsProcessing(false)
-        setStatus('idle')
-        addToast('error', 'Connection Error', 'Could not reach Eva. Please try again.')
+        console.error("[useVoice] handleUserMessage error:", err);
+        s.setEvaTyping(false);
+        s.setIsProcessing(false);
+        s.setStatus("idle");
+        processingRef.current = false;
+        addToast(
+          "error",
+          "Connection Error",
+          "Could not reach Eva. Please try again.",
+        );
       }
     },
-    [addMessage, addToast, setCurrentEvaMessage, setEvaTyping, setIsProcessing, setStatus]
-  )
+    [addToast],
+  );
+
+  // ── Wire up voice service callbacks once ──────────────────────────────────
+  useEffect(() => {
+    voiceService.setCallbacks({
+      onStatus: (status) => {
+        const s = storeRef.current;
+        if (status === "listening") {
+          s.setStatus("listening");
+          s.setIsRecording(true);
+        } else {
+          s.setIsRecording(false);
+        }
+      },
+
+      // Called every time we get a final transcript
+      onTranscript: (text, isFinal) => {
+        const s = storeRef.current;
+        if (!isFinal) {
+          s.setInterimTranscript(text);
+          return;
+        }
+        // Final transcript — clear interim and send immediately
+        s.setInterimTranscript("");
+        s.setTranscript("");
+        if (text.trim() && !processingRef.current) {
+          handleUserMessage(text.trim());
+        }
+      },
+
+      onLevel: (level) => storeRef.current.setAudioLevel(level),
+
+      onError: (err) => {
+        addToast("error", "Voice Error", err);
+        storeRef.current.setStatus("idle");
+        storeRef.current.setIsRecording(false);
+      },
+    });
+
+    ttsService.setCallbacks({
+      onStart: () => {
+        storeRef.current.setIsSpeaking(true);
+        storeRef.current.setStatus("speaking");
+      },
+      onEnd: () => {
+        storeRef.current.setIsSpeaking(false);
+        if (storeRef.current.activeSession) {
+          storeRef.current.setStatus("listening");
+        } else {
+          storeRef.current.setStatus("idle");
+        }
+      },
+    });
+
+    return () => {
+      voiceService.stopListening();
+      ttsService.stop();
+    };
+  }, [handleUserMessage]);
+
+  // ── Public API ────────────────────────────────────────────────────────────
 
   const startListening = useCallback(async () => {
     if (!voiceService.supported) {
-      addToast('warning', 'Not Supported', 'Voice recognition is not supported in this browser. Try Chrome or Edge.')
-      return
+      addToast(
+        "warning",
+        "Not Supported",
+        "Voice recognition needs Chrome or Edge.",
+      );
+      return;
     }
-    await voiceService.startListening()
-  }, [addToast])
+    processingRef.current = false;
+    await voiceService.startListening();
+  }, [addToast]);
 
   const stopListening = useCallback(() => {
-    voiceService.stopListening()
-    setStatus('idle')
-    setIsRecording(false)
-  }, [setIsRecording, setStatus])
+    voiceService.stopListening();
+    storeRef.current.setStatus("idle");
+    storeRef.current.setIsRecording(false);
+  }, []);
 
   const sendTextMessage = useCallback(
     (text: string) => {
-      handleUserMessage(text)
+      handleUserMessage(text);
     },
-    [handleUserMessage]
-  )
+    [handleUserMessage],
+  );
 
   const stopSpeaking = useCallback(() => {
-    ttsService.stop()
-    setIsSpeaking(false)
-    setStatus('idle')
-  }, [setIsSpeaking, setStatus])
+    ttsService.stop();
+    storeRef.current.setIsSpeaking(false);
+    storeRef.current.setStatus("idle");
+  }, []);
 
   return {
-    status,
-    isRecording,
+    status: store.status,
+    isRecording: store.isRecording,
     startListening,
     stopListening,
     sendTextMessage,
     stopSpeaking,
     isSupported: voiceService.supported,
-  }
+  };
 }

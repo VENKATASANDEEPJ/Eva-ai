@@ -2,12 +2,18 @@
 Eva's Interview Engine.
 Generates role-specific questions, evaluates answers, and produces
 detailed interview reports.
+
+When OpenAI is not configured, runs a fully scripted interview using
+the question banks — no API key needed.
 """
+
 import json
 import re
+import random
 from datetime import datetime, timezone
 from typing import Any
 from app.services.openai_client import chat_completion
+from app.core.config import settings
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -119,6 +125,10 @@ Return responses as JSON:
 
 async def get_interview_opener(role: str) -> str:
     """Generate a natural interview opening."""
+    # No OpenAI key — use the scripted opener directly
+    if not settings.openai_api_key:
+        return _default_opener(role)
+
     role_label = role.replace("_", " ").title()
     prompt = f"""Generate a warm, professional interview opening for a {role_label} position.
 Include: brief greeting, your name (Eva, Senior Interviewer), the role, and the first interview question.
@@ -131,7 +141,7 @@ Keep it natural and encouraging. Under 100 words."""
             temperature=0.7,
             max_tokens=200,
         )
-        data = json.loads(re.search(r'\{.*\}', raw, re.DOTALL).group())  # type: ignore
+        data = json.loads(re.search(r"\{.*\}", raw, re.DOTALL).group())  # type: ignore
         return data.get("message", _default_opener(role))
     except Exception:
         return _default_opener(role)
@@ -163,8 +173,35 @@ async def generate_interview_response(
     next_q_idx = min(question_count, len(questions) - 1)
     next_question = questions[next_q_idx]
 
-    system = INTERVIEW_SYSTEM_PROMPT + f"\n\nRole: {role_label}\nQuestion {question_count}/{max_questions}"
+    system = (
+        INTERVIEW_SYSTEM_PROMPT
+        + f"\n\nRole: {role_label}\nQuestion {question_count}/{max_questions}"
+    )
     trimmed = conversation_history[-10:]
+
+    # No OpenAI key — use varied scripted transitions
+    if not settings.openai_api_key:
+        acknowledgements = [
+            "Thank you for sharing that.",
+            "That's a thoughtful answer.",
+            "I appreciate your perspective.",
+            "Good, I like how you framed that.",
+            "Interesting — thanks for being honest about that.",
+            "That makes sense.",
+            "Great, I can see you've thought about this.",
+            "Noted, thank you.",
+        ]
+        ack = random.choice(acknowledgements)
+        connectors = [
+            f"{ack} Let's move on to the next question: {next_question}",
+            f"{ack} Here's what I'd like to ask you next: {next_question}",
+            f"{ack} Moving forward — {next_question}",
+            f"{ack} Now I'd like to explore something else: {next_question}",
+        ]
+        return {
+            "message": random.choice(connectors),
+            "isComplete": False,
+        }
 
     messages = [
         {"role": "system", "content": system},
@@ -178,7 +215,7 @@ async def generate_interview_response(
 
     try:
         raw = await chat_completion(messages, temperature=0.75, max_tokens=300)
-        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+        json_match = re.search(r"\{.*\}", raw, re.DOTALL)
         if json_match:
             data = json.loads(json_match.group())
             return {"message": data.get("message", raw), "isComplete": False}
@@ -186,7 +223,7 @@ async def generate_interview_response(
     except Exception as e:
         logger.error(f"Interview response error: {e}")
         return {
-            "message": f"Thank you for that answer. Now let me ask: {next_question}",
+            "message": f"Thank you for that answer. Here's my next question: {next_question}",
             "isComplete": False,
         }
 
@@ -268,7 +305,7 @@ For HR/behavioral, focus on communication, structure (STAR method), and professi
             temperature=0.3,
             max_tokens=2000,
         )
-        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+        json_match = re.search(r"\{.*\}", raw, re.DOTALL)
         if json_match:
             data = json.loads(json_match.group())
             return {
@@ -294,8 +331,13 @@ def _default_report(session_id: str, role: str) -> dict[str, Any]:
         "sessionId": session_id,
         "role": role,
         "scores": {
-            "grammar": 72, "vocabulary": 70, "fluency": 68,
-            "confidence": 65, "communication": 70, "technical": 68, "overall": 69
+            "grammar": 72,
+            "vocabulary": 70,
+            "fluency": 68,
+            "confidence": 65,
+            "communication": 70,
+            "technical": 68,
+            "overall": 69,
         },
         "strengths": [
             "Participated actively in the interview",
