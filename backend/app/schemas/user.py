@@ -1,9 +1,19 @@
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
-class UserSettings(BaseModel):
+# ── Shared config: serialise as camelCase for the frontend ────────────────────
+class CamelModel(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,  # still accept snake_case on input
+        from_attributes=True,
+    )
+
+
+class UserSettings(CamelModel):
     preferred_voice: str = "nova"
     speech_rate: float = 1.0
     auto_listen: bool = True
@@ -14,7 +24,7 @@ class UserSettings(BaseModel):
     notifications: bool = False
 
 
-class UserStats(BaseModel):
+class UserStats(CamelModel):
     total_sessions: int = 0
     total_speaking_minutes: int = 0
     current_streak: int = 0
@@ -24,7 +34,7 @@ class UserStats(BaseModel):
     average_score: float = 0.0
 
 
-class UserResponse(BaseModel):
+class UserResponse(CamelModel):
     id: str
     email: str
     name: str
@@ -34,11 +44,10 @@ class UserResponse(BaseModel):
     settings: UserSettings
     stats: UserStats
 
-    model_config = {"from_attributes": True}
-
     @classmethod
     def from_orm_user(cls, user: object) -> "UserResponse":
         from app.models.user import User as UserModel
+
         u: UserModel = user  # type: ignore
         return cls(
             id=u.id,
@@ -64,12 +73,20 @@ class UserResponse(BaseModel):
                 longest_streak=u.longest_streak,
                 words_learned=u.words_learned,
                 sessions_this_week=u.sessions_this_week,
-                average_score=u.average_score,
+                average_score=round(float(u.average_score or 0), 1),
             ),
         )
 
+    def model_dump_camel(self) -> dict:
+        """Return dict with camelCase keys for JSON responses."""
+        return self.model_dump(by_alias=True)
+
 
 class UpdateSettingsRequest(BaseModel):
+    """Accepts either snake_case or camelCase from the frontend."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
     preferred_voice: Optional[str] = None
     speech_rate: Optional[float] = None
     auto_listen: Optional[bool] = None

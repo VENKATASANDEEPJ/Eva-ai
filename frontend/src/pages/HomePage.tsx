@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   MessageCircle,
   Briefcase,
@@ -11,70 +11,76 @@ import {
   TrendingUp,
   Zap,
   ArrowRight,
-} from 'lucide-react'
-import { useAuthStore } from '@/stores/authStore'
-import { Card } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
-import { formatDuration } from '@/lib/utils'
+} from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
+import { Badge } from "@/components/ui/Badge";
+import { safeInt, safeFloat, formatSpeakingTime } from "@/lib/utils";
 
 const quickActions = [
   {
-    id: 'conversation',
-    title: 'Talk to Eva',
-    description: 'Start a free-flowing voice conversation',
+    id: "conversation",
+    title: "Talk to Eva",
+    description: "Start a free-flowing voice conversation",
     icon: MessageCircle,
-    color: 'from-eva-accent to-eva-accent-bright',
-    glow: 'rgba(99,102,241,0.3)',
-    path: '/conversation',
-    badge: 'Voice',
+    color: "from-eva-accent to-eva-accent-bright",
+    glow: "rgba(99,102,241,0.3)",
+    path: "/conversation",
+    badge: "Voice",
   },
   {
-    id: 'interview',
-    title: 'Interview Practice',
-    description: 'Simulate real interview scenarios',
+    id: "interview",
+    title: "Interview Practice",
+    description: "Simulate real interview scenarios",
     icon: Briefcase,
-    color: 'from-eva-purple to-purple-400',
-    glow: 'rgba(168,85,247,0.3)',
-    path: '/interview',
-    badge: 'Popular',
+    color: "from-eva-purple to-purple-400",
+    glow: "rgba(168,85,247,0.3)",
+    path: "/interview",
+    badge: "Popular",
   },
   {
-    id: 'practice',
-    title: 'Daily Practice',
-    description: 'Focused skill-building exercises',
+    id: "practice",
+    title: "Daily Practice",
+    description: "Focused skill-building exercises",
     icon: BookOpen,
-    color: 'from-eva-cyan to-cyan-400',
-    glow: 'rgba(34,211,238,0.3)',
-    path: '/practice',
-    badge: 'New',
+    color: "from-eva-cyan to-cyan-400",
+    glow: "rgba(34,211,238,0.3)",
+    path: "/practice",
+    badge: "New",
   },
   {
-    id: 'dashboard',
-    title: 'View Progress',
-    description: 'Track your improvement journey',
+    id: "dashboard",
+    title: "View Progress",
+    description: "Track your improvement journey",
     icon: BarChart3,
-    color: 'from-eva-green to-emerald-400',
-    glow: 'rgba(16,185,129,0.3)',
-    path: '/dashboard',
+    color: "from-eva-green to-emerald-400",
+    glow: "rgba(16,185,129,0.3)",
+    path: "/dashboard",
     badge: null,
   },
-]
+];
 
 export function HomePage() {
-  const { user } = useAuthStore()
-  const navigate = useNavigate()
-  const stats = user?.stats
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const stats = user?.stats;
+
+  // All stat values go through safe helpers — never NaN or undefined in the UI
+  const streak = safeInt(stats?.currentStreak);
+  const speakMins = safeInt(stats?.totalSpeakingMinutes);
+  const words = safeInt(stats?.wordsLearned);
+  const avgScore = safeFloat(stats?.averageScore);
+  const weekSess = safeInt(stats?.sessionsThisWeek);
 
   const greeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return 'Good morning'
-    if (hour < 17) return 'Good afternoon'
-    return 'Good evening'
-  }
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 lg:px-8 py-8 space-y-8">
-      {/* Hero greeting */}
+      {/* Hero */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -84,19 +90,29 @@ export function HomePage() {
         <div className="relative">
           <p className="text-eva-text-muted text-sm mb-1">{greeting()},</p>
           <h1 className="text-3xl font-bold text-eva-text mb-2">
-            {user?.name?.split(' ')[0] ?? 'there'} 👋
+            {user?.name?.split(" ")[0] ?? "there"} 👋
           </h1>
-          <p className="text-eva-text-dim">Ready to practice today? Eva is waiting for you.</p>
+          <p className="text-eva-text-dim">
+            Ready to practice today? Eva is waiting for you.
+          </p>
 
           <div className="flex flex-wrap gap-3 mt-5">
-            {stats && (
-              <>
-                <StatPill icon={<Flame size={13} className="text-eva-amber" />} value={`${stats.currentStreak} day streak`} />
-                <StatPill icon={<Clock size={13} className="text-eva-cyan" />} value={`${formatDuration(stats.totalSpeakingMinutes * 60)} total`} />
-                <StatPill icon={<Star size={13} className="text-eva-green" />} value={`${stats.wordsLearned} words learned`} />
-                <StatPill icon={<TrendingUp size={13} className="text-eva-purple" />} value={`${stats.averageScore}% avg score`} />
-              </>
-            )}
+            <StatPill
+              icon={<Flame size={13} className="text-eva-amber" />}
+              value={`${streak} day${streak === 1 ? "" : "s"} streak`}
+            />
+            <StatPill
+              icon={<Clock size={13} className="text-eva-cyan" />}
+              value={`${formatSpeakingTime(speakMins)} total`}
+            />
+            <StatPill
+              icon={<Star size={13} className="text-eva-green" />}
+              value={`${words} words learned`}
+            />
+            <StatPill
+              icon={<TrendingUp size={13} className="text-eva-purple" />}
+              value={`${avgScore.toFixed(0)}% avg score`}
+            />
           </div>
         </div>
       </motion.div>
@@ -117,29 +133,44 @@ export function HomePage() {
               onClick={() => navigate(action.path)}
               className="group relative overflow-hidden rounded-2xl p-5 text-left border border-eva-border/50 bg-eva-surface hover:border-eva-accent/30 transition-all duration-300"
               style={{ boxShadow: `0 0 0 0 ${action.glow}` }}
-              whileHover={{ scale: 1.02, boxShadow: `0 8px 32px ${action.glow}` }}
+              whileHover={{
+                scale: 1.02,
+                boxShadow: `0 8px 32px ${action.glow}`,
+              }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* Background gradient */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
-
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-5 transition-opacity`}
+              />
               <div className="relative">
-                {action.badge && (
+                {action.badge ? (
                   <div className="flex justify-end mb-2">
-                    <Badge variant={action.badge === 'Popular' ? 'purple' : action.badge === 'Voice' ? 'accent' : 'cyan'}>
+                    <Badge
+                      variant={
+                        action.badge === "Popular"
+                          ? "purple"
+                          : action.badge === "Voice"
+                            ? "accent"
+                            : "cyan"
+                      }
+                    >
                       {action.badge}
                     </Badge>
                   </div>
+                ) : (
+                  <div className="h-6 mb-2" />
                 )}
-                {!action.badge && <div className="h-6 mb-2" />}
-
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-3 opacity-90`}>
+                <div
+                  className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-3 opacity-90`}
+                >
                   <action.icon size={20} className="text-white" />
                 </div>
-
-                <h3 className="text-sm font-semibold text-eva-text mb-1">{action.title}</h3>
-                <p className="text-xs text-eva-text-muted leading-relaxed">{action.description}</p>
-
+                <h3 className="text-sm font-semibold text-eva-text mb-1">
+                  {action.title}
+                </h3>
+                <p className="text-xs text-eva-text-muted leading-relaxed">
+                  {action.description}
+                </p>
                 <div className="flex items-center gap-1 mt-3 text-xs text-eva-accent opacity-0 group-hover:opacity-100 transition-opacity">
                   <span>Start</span>
                   <ArrowRight size={11} />
@@ -150,20 +181,38 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Stats row */}
-      {stats && (
-        <div>
-          <h2 className="text-sm font-semibold text-eva-text mb-4">This Week</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <StatCard label="Sessions" value={stats.sessionsThisWeek} unit="sessions" delay={0} />
-            <StatCard label="Speaking Time" value={stats.totalSpeakingMinutes} unit="mins" delay={0.05} />
-            <StatCard label="Avg Score" value={`${stats.averageScore}%`} unit="" delay={0.1} />
-            <StatCard label="Words Learned" value={stats.wordsLearned} unit="words" delay={0.15} />
-          </div>
+      {/* Stats row — always rendered, zeros when no data */}
+      <div>
+        <h2 className="text-sm font-semibold text-eva-text mb-4">This Week</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard
+            label="Sessions"
+            value={weekSess}
+            unit="sessions"
+            delay={0}
+          />
+          <StatCard
+            label="Speaking Time"
+            value={`${speakMins}`}
+            unit="mins"
+            delay={0.05}
+          />
+          <StatCard
+            label="Avg Score"
+            value={`${avgScore.toFixed(0)}%`}
+            unit=""
+            delay={0.1}
+          />
+          <StatCard
+            label="Words Learned"
+            value={words}
+            unit="words"
+            delay={0.15}
+          />
         </div>
-      )}
+      </div>
 
-      {/* Tips */}
+      {/* Tip */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -177,13 +226,15 @@ export function HomePage() {
           <div>
             <p className="text-sm font-medium text-eva-text mb-1">Pro Tip</p>
             <p className="text-xs text-eva-text-dim leading-relaxed">
-              Consistency beats intensity. Even 10 minutes of daily practice with Eva will produce remarkable improvement in your fluency and confidence within a month.
+              Consistency beats intensity. Even 10 minutes of daily practice
+              with Eva will produce remarkable improvement in your fluency and
+              confidence within a month.
             </p>
           </div>
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
 
 function StatPill({ icon, value }: { icon: React.ReactNode; value: string }) {
@@ -192,7 +243,7 @@ function StatPill({ icon, value }: { icon: React.ReactNode; value: string }) {
       {icon}
       <span>{value}</span>
     </div>
-  )
+  );
 }
 
 function StatCard({
@@ -201,10 +252,10 @@ function StatCard({
   unit,
   delay,
 }: {
-  label: string
-  value: string | number
-  unit: string
-  delay: number
+  label: string;
+  value: string | number;
+  unit: string;
+  delay: number;
 }) {
   return (
     <motion.div
@@ -216,8 +267,12 @@ function StatCard({
       <p className="text-xs text-eva-text-muted mb-1">{label}</p>
       <p className="text-2xl font-bold text-eva-text">
         {value}
-        {unit && <span className="text-sm font-normal text-eva-text-muted ml-1">{unit}</span>}
+        {unit && (
+          <span className="text-sm font-normal text-eva-text-muted ml-1">
+            {unit}
+          </span>
+        )}
       </p>
     </motion.div>
-  )
+  );
 }

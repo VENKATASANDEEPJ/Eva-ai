@@ -139,12 +139,14 @@ async def demo_login():
 
     from app.schemas.user import UserResponse
 
-    return {
-        "success": True,
-        "message": "Demo login successful",
-        "data": {
-            "user": UserResponse.from_orm_user(user).model_dump(),
-            "accessToken": create_access_token(user.id),
-            "refreshToken": create_refresh_token(user.id),
-        },
-    }
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": "Demo login successful",
+            "data": {
+                "user": UserResponse.from_orm_user(user).model_dump(by_alias=True),
+                "accessToken": create_access_token(user.id),
+                "refreshToken": create_refresh_token(user.id),
+            },
+        }
+    )
